@@ -26,7 +26,7 @@ def ConstCurrent(time_vect, stimMag, stimStartEnd_vect):
             current_vect[x] = stimMag
     return current_vect
 
-class Neuron:
+'''class Neuron:
     def __init__(self, tau_param, u_param):
         self.tau = tau_param 
         self.v_vect = np.zeros(len(t_vect)) #Creates firing output vector
@@ -52,12 +52,131 @@ class Neuron:
         axs[1].set_ylabel("Firing rate [spikes/second]")
         plt.show()
     def InjectionCalculation(self):
-        '''Calculates the firing rate over entire t_vect after an injection modelled by an input current'''
-    def SynapticCalculation(self):
-        '''Calculates the firing rate based on synaptic input'''
-    def InputConstruction(self, inputNeuron_vect):
-        '''Constructs the u vector based on all neurons that feed into it'''
+        #Calculates the firing rate over entire t_vect after an injection modelled by an input current
+    def SynapticCalculation(self, u_param, w_param):
+        #Calculates the firing rate based on synaptic input
     def SynapticCurrentConstruction(self):
-        '''Take the inputs and calculate all the synaptic current over time'''
+        #Take the inputs and calculate all the synaptic current over time
     def RateConstruction(self):
-        '''Take the synaptic current and use the update rule and a sigmoid to update the firing rate'''
+        #Take the synaptic current and use the update rule and a sigmoid to update the firing rate
+    def GetV(self):
+        return self.v_vect'''
+
+#Code Plan
+#Store the neurons in an multidimensional array with the first level being 0
+#For each level, determine firing rate at time t=dt (initally everything is 0)
+#Move up a level and use inputs to calculate the firing rates using the u
+'''
+neuronalStructure = [[Neuron()],[Neuron()]]
+def InputConstruction(levelIdx_param, neuronIdx_param):
+    #Constructs the u vector based on all neurons that feed into it.
+       Relies on the neuronalStructure to extract which neurons have dependencies on which other neurons
+#Iterate through the array to set the synpatic current
+for t in t_vect:
+    for levelIdx in range(len(neuronalStructure)-1):
+        for nIdx in range(len(levelIdx)-1):
+            u_vect = neuron.SynapticCalculation(InputConstruction(levelIdx, nIdx))
+            #Insert stepwise updating for the 
+#Iterate through a second time to use the synaptic current to update the  
+for t in t_vect:
+    for levelIdx in range(len(neuronalStructure)-1):
+        for nIdx in range(len(levelIdx)-1):
+            u_vect = neuron.SynapticCalculation(InputConstruction(levelIdx, nIdx))
+            #Insert stepwise updating for the'''
+
+
+#**********************************************************************************************************************\
+def ActivationFunctionSigmoid(I_s_param):
+    return 1/(1+math.exp(-I_s_param))
+def ActivationFunctionSelf(I_s_param):
+    return I_s_param
+def UpdateRuleSynapticSigmoid(u_vect_param, w_vect_param, v_prev, dt_param, tau_param):
+    return v_prev + dt_param/tau_param*(-v_prev + ActivationFunctionSigmoid(np.dot(u_vect_param, w_vect_param)))
+def UpdateRuleSynapticSelf(u_vect_param, w_vect_param, v_prev, dt_param, tau_param):
+    return v_prev + dt_param/tau_param*(-v_prev + ActivationFunctionSelf(np.dot(u_vect_param, w_vect_param)))
+
+'''#Neuron 1
+u1_vect = ConstCurrent(t_vect, 30, [t_stimStart, t_stimEnd])
+w1 = 1
+v1_vect = np.zeros(len(t_vect))
+tIdx = 1
+while tIdx < len(t_vect):
+    v1_vect[tIdx] = UpdateRuleSynaptic(u1_vect[tIdx-1], w1, v1_vect[tIdx-1], dt, tau)
+    tIdx = tIdx + 1
+
+plt.plot(t_vect, v1_vect)
+plt.plot(t_stimStart + tau, .63 * 30, 'ro')
+plt.show()
+
+#Neuron 2
+w2 = 2
+v2_vect = np.zeros(len(t_vect))
+tIdx = 1
+while tIdx < len(t_vect):
+    v2_vect[tIdx] = UpdateRuleSynaptic(v1_vect[tIdx-1], w2, v2_vect[tIdx-1], dt, tau)
+    tIdx = tIdx + 1
+plt.plot(t_vect, v2_vect)
+#plt.plot(t_stimStart + tau, .63 * 30, 'ro')
+plt.show()'''
+
+#*************************************************************************************************************************
+'''#Neuron 1a
+u1a_vect = ConstCurrent(t_vect, 30, [t_stimStart, t_stimEnd])
+w1a = 1
+v1a_vect = np.zeros(len(t_vect))
+tIdx = 1
+while tIdx < len(t_vect):
+    v1a_vect[tIdx] = UpdateRuleSynapticSelf(u1a_vect[tIdx-1], w1a, v1a_vect[tIdx-1], dt, tau)
+    tIdx = tIdx + 1
+
+plt.plot(t_vect, v1a_vect)
+plt.plot(t_stimStart + tau, .63 * 30, 'ro')
+plt.show()
+
+#Neuron 1b
+u1b_vect = ConstCurrent(t_vect, 30, [t_stimStart, t_stimEnd])
+w1b = 1
+v1b_vect = np.zeros(len(t_vect))
+tIdx = 1
+while tIdx < len(t_vect):
+    v1b_vect[tIdx] = UpdateRuleSynapticSelf(u1b_vect[tIdx-1], w1b, v1b_vect[tIdx-1], dt, tau)
+    tIdx = tIdx + 1
+
+plt.plot(t_vect, v1b_vect)
+plt.plot(t_stimStart + tau, .63 * 30, 'ro')
+plt.show()
+
+#Neuron 2
+w2 = [1,0.5]
+v2_vect = np.full(len(t_vect),0.5)
+tIdx = 1
+while tIdx < len(t_vect):
+    myU_vect = [v1a_vect[tIdx-1],v1a_vect[tIdx-1]]
+    v2_vect[tIdx] = UpdateRuleSynapticSelf(myU_vect, w2, v2_vect[tIdx-1], dt, tau)
+    tIdx = tIdx + 1
+plt.plot(t_vect, v2_vect)
+#plt.plot(t_stimStart + tau, .63 * 30, 'ro')
+plt.show()'''
+#***********************************
+#Neuron 1
+u1a_vect = ConstCurrent(t_vect, 30, [t_stimStart, t_stimEnd])
+w1a = 1
+v1a_vect = np.zeros(len(t_vect))
+tIdx = 1
+while tIdx < len(t_vect):
+    v1a_vect[tIdx] = UpdateRuleSynapticSelf(u1a_vect[tIdx-1], w1a, v1a_vect[tIdx-1], dt, tau)
+    tIdx = tIdx + 1
+
+w2a = 2
+tIdx = 1
+while tIdx < len(t_vect):
+    v1a_vect[tIdx] = UpdateRuleSynapticSelf(u1a_vect[tIdx-1], w2a, v1a_vect[tIdx-1], dt, tau)
+    tIdx = tIdx + 1
+
+plt.plot(t_vect, v1a_vect)
+plt.plot(t_stimStart + tau, .63 * 30, 'ro')
+plt.show()
+
+
+                                                          
+                                                                                                    
