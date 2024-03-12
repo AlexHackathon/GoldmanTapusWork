@@ -6,7 +6,7 @@ dt = 0.1 #Time step [ms]
 t_stimStart = 100 #Time start box current [ms]
 t_stimEnd = 500 #Time stop box current [ms]
 t_end = 1000 #Time to stop the simulation [ms]
-I_e = 1.43 #Magnitude of current
+I_e = 1.43 #Magnitude of current [spikes/sec]
 
 tau = 20 #membrane time constant [ms]
 t_vect = np.arange(0, t_end, dt) #Creates time vector[ms] with time step dt[ms]

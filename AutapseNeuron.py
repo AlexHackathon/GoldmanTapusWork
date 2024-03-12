@@ -27,7 +27,7 @@ def ConstCurrent(time_vect, stimMag, stimStartEnd_vect):
     return current_vect
 
 
-current1_vect = ConstCurrent(t_vect, 30, [t_stimStart, t_stimEnd])
+current1_vect = ConstCurrent(t_vect, 30, [t_stimStart, t_stimEnd]) #Current injected into the neuron [spikes/sec]
 weightMatrix = np.array([-.5])
 v1a_vect = np.zeros(len(t_vect))
 tIdx = 1
