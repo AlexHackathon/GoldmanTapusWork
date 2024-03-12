@@ -38,5 +38,4 @@ while tIdx < len(t_vect):
     tIdx = tIdx + 1
 
 plt.plot(t_vect, v1a_vect)
-#plt.plot(t_stimStart + tau, .63 * 30, 'ro')
 plt.show()
