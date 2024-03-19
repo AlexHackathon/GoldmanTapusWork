@@ -27,7 +27,7 @@ def ConstCurrent(time_vect, stimMag, stimStartEnd_vect):
     return current_vect
 
 class Neuron:
-    def __init__(self, current_param, ):
+    def __init__(self, current_param=np.zeros(len(t_vect))):
         '''Sets the current injected over time and initalizes it's firing output vector'''
         self.current_vect = current_param
         self.v_vect = np.zeros(len(t_vect))
@@ -39,6 +39,10 @@ class Neuron:
         '''Uses a nonlinear update rule by passing the dot product of input and weights through an activation function'''
         totalInput = -self.v_vect[tIdx_param-1] + self.current_vect[tIdx_param-1] + activationFunction(sum(np.dot(u_vect, weights_mat)))
         self.v_vect[tIdx_param] = self.v_vect[tIdx_param-1] + dt_param/tau_param*totalInput
+    def SigmoidActivation(self, current):
+        return 1/(1+ exp(-current))
+    def FractionActivation(self, current):
+        return 1/(1-current)
         
 tIdx = 1
 #NONFUNCTIONAL

@@ -26,16 +26,36 @@ def ConstCurrent(time_vect, stimMag, stimStartEnd_vect):
             current_vect[x] = stimMag
     return current_vect
 
+def Activation1(a_param, p_param, r_param):
+    numerator = r_param ** p_param
+    denominator = a_param + r_param ** p_param
+    return numerator/denominator
+
+def Activation2(a_param, p_param, r_param):
+    numerator = r_param
+    denominator = a_param - r_param
+    return numerator/denominator
+
 
 current1_vect = ConstCurrent(t_vect, 30, [t_stimStart, t_stimEnd]) #Current injected into the neuron [spikes/sec]
-weightMatrix = np.array([-.5])
+weightMatrix = np.array([0])
 v1a_vect = np.zeros(len(t_vect))
 tIdx = 1
 
+#Linear version
 while tIdx < len(t_vect):
-    totalInput = -v1a_vect[tIdx-1] + np.dot([v1a_vect[tIdx-1]], weightMatrix) + current1_vect[tIdx-1]
-    v1a_vect[tIdx] = v1a_vect[tIdx-1] + dt/tau*totalInput
+    totalInput = np.dot([v1a_vect[tIdx-1]], weightMatrix) + current1_vect[tIdx-1]
+    v1a_vect[tIdx] = v1a_vect[tIdx-1] + dt/tau*(-v1a_vect[tIdx-1] + totalInput)
     tIdx = tIdx + 1
 
 plt.plot(t_vect, v1a_vect)
 plt.show()
+
+#Nonlinear version
+weightMatrix = np.array([0])
+v1a_vect = np.zeros(len(t_vect))
+tIdx = 1
+while tIdx < len(t_vect):
+    totalInput = np.dot([v1a_vect[tIdx-1]], weightMatrix) + current1_vect[tIdx-1]
+    v1a_vect[tIdx] = v1a_vect[tIdx-1] + dt/tau*(-v1a_vect[tIdx-1] + totalInput)
+    tIdx = tIdx + 1
