@@ -27,22 +27,19 @@ def ConstCurrent(time_vect, stimMag, stimStartEnd_vect):
             current_vect[x] = stimMag
     return current_vect
 
-def Activation1(a_param, p_param, r_param):
+def Activation(a_param, p_param, r_param):
     numerator = r_param ** p_param
     denominator = a_param + r_param ** p_param
     return numerator/denominator
-
-def Activation2(a_param, p_param, r_param):
-    numerator = r_param
-    denominator = a_param - r_param
-    return numerator/denominator
+def Self(a_param, p_param, r_param):
+    return r_param
 
 #Begin linear regression fitting
 #Global simulation variables that show what to calculate
-plotCurrent = False
-plotFiringRate = False
-plotTeff = False
-plotNonlinear = True
+plotCurrent = False #Should the current be plotted (NOT IMPLEMENTED)
+plotFiringRate = False #Should the nonlinear firing rate with different weights be plotted
+plotTeff = False #Should t_eff vs weight be plotted
+plotNonlinear = True #Should the nonlinear functions and how they vary be plotted
 
 #Variables for linear regression
 timeCalcStart = 550 #Time to start fitting from [ms]
@@ -75,11 +72,16 @@ for w in weightValues:
     reg.fit(deltaT,yReg)
     t_eff[tauIdx] = -1/reg.coef_[0][0]
     tauIdx = tauIdx + 1
-
+if plotTeff:
+    plt.plot(weightValues, t_eff)
+    plt.suptitle("Relationship Between Tau Effective and Synaptic Weights")
+    plt.xlabel("Recurrent Synaptic Weight")
+    plt.ylabel("Tau Effective")
+    plt.show()
 #Running a simulation for different values of nonlinear activation functions
-r = np.linspace(0,5, 100)
-a_vals = np.arange(1,10, 2)
-p_vals = np.arange(1,5, 1)
+r = np.linspace(0,1, 100)
+a_vals = np.arange(1,50, 2)
+p_vals = np.arange(1,4, 1)
 y_a = np.zeros(len(r))
 
 if plotNonlinear:
@@ -88,23 +90,55 @@ if plotNonlinear:
 
     for a in a_vals:
         for i in range(0,len(r)):
-            y_a[i] = r[i]**2/(a+r[i]**2)
+            y_a[i] = r[i]/(a+r[i])
         axs[0].plot(r, y_a, label=str(a))
-    axs[0].set_title("Varrying a Values With p=2")
+    axs[0].set_title("Varrying a Values With p=1")
     axs[0].legend()
+    axs[0].plot()
 
     for p in p_vals:
         for i in range(0,len(r)):
-            y_a[i] = r[i]**p/(2+r[i]**p)
+            y_a[i] = r[i]**p/(20+r[i]**p)
         axs[1].plot(r, y_a, label=str(p))
-    axs[1].set_title("Varrying p Values With a=2")
+    axs[1].set_title("Varrying p Values With a=20")
     axs[1].legend()
-
-
-    if plotTeff:
-        plt.plot(weightValues, t_eff)
+    axs[1].plot()
     plt.show()
 
 #Running a simulation using a given nonlinear activation function
+#Constants for every run
+weightValuesNonlinear = [-1, -.5, 0, .5]
 
+if plotFiringRate:
+    #Running the simulation for every weight in the weight values
+    fig, axs = plt.subplots(1)
+    fig.suptitle("Firing Rate Over Time With Varying Synaptic Weights")
+    plotIdx = 0
+    a = 40
+    p = 1
+    for w in weightValuesNonlinear:
+        v2a_vect = np.zeros(len(t_vect))
+        tIdx = 1
+        #Update rule for autapse
+        while tIdx < len(t_vect):
+            totalInput = v2a_vect[tIdx-1]*w + current1_vect[tIdx-1]
+            if tIdx > 4500 and tIdx < 4510:
+                print(totalInput)
+            v2a_vect[tIdx] = v2a_vect[tIdx-1] + dt/tau*(-v2a_vect[tIdx-1] + Activation(a,p,totalInput))
+            tIdx = tIdx + 1
+        axs.plot(t_vect, v2a_vect, label=str(w))
+        axs.set_ylabel("Firing rate")
+        axs.set_xlabel("Time")
+    axs.legend()
+    plt.show()
 
+#Running a simulation for finding fixed points
+rPotentialValues = np.linspace(0,1,50)
+externalInput = 30
+wVals = [-1,-.5,0,.5,1]
+for w in wVals:
+    activationTransformation = [Activation(.3,1,r*w + externalInput) for r in rPotentialValues]
+    y = (-rPotentialValues + activationTransformation) / tau
+    plt.plot(rPotentialValues, y, label=str(w))
+plt.legend()
+plt.show()
