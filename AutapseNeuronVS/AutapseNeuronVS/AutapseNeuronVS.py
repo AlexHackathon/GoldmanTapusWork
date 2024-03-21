@@ -38,12 +38,12 @@ def Self(a_param, p_param, r_param):
 #Global simulation variables that show what to calculates
 plotCurrent = False #Should the current be plotted (NOT IMPLEMENTED)
 plotFiringRate = False #Should the nonlinear firing rate with different weights be plotted
-plotTeff = False #Should t_eff vs weight be plotted
+plotTeff = True #Should t_eff vs weight be plotted
 plotNonlinear = False #Should the nonlinear functions and how they vary be plotted
 plotFixedPoints = False #Should r x drdt be plotted
 #Begin linear regression fitting
 #Variables for linear regression
-timeCalcStart = 550 #Time to start fitting from [ms]
+timeCalcStart = 600 #Time to start fitting from [ms]
 trainTIdx = np.searchsorted(t_vect, timeCalcStart) #Index where time is greater than timeCalcStart ms
 deltaT = t_vect[trainTIdx:] - t_vect[trainTIdx] #Array of delta ts from t0=timeCalcStart
 deltaT = deltaT.reshape(-1,1)
@@ -74,7 +74,9 @@ for w in weightValues:
     t_eff[tauIdx] = -1/reg.coef_[0][0]
     tauIdx = tauIdx + 1
 if plotTeff:
-    plt.plot(weightValues, t_eff)
+    plt.plot(weightValues, t_eff, label="Regression")
+    plt.plot(weightValues, tau/(1-weightValues),'--', label="Analytical")
+    plt.legend()
     plt.suptitle("Relationship Between Tau Effective and Synaptic Weights")
     plt.xlabel("Recurrent Synaptic Weight")
     plt.ylabel("Tau Effective")
