@@ -38,8 +38,8 @@ def Self(a_param, p_param, r_param):
 #Global simulation variables that show what to calculates
 plotCurrent = False #Should the current be plotted (NOT IMPLEMENTED)
 plotFiringRate = False #Should the nonlinear firing rate with different weights be plotted
-plotTeff = True #Should t_eff vs weight be plotted
-plotNonlinear = False #Should the nonlinear functions and how they vary be plotted
+plotTeff = False #Should t_eff vs weight be plotted
+plotNonlinear = True #Should the nonlinear functions and how they vary be plotted
 plotFixedPoints = False #Should r x drdt be plotted
 #Begin linear regression fitting
 #Variables for linear regression
@@ -53,6 +53,7 @@ current1_vect = ConstCurrent(t_vect, .1, [t_stimStart, t_stimEnd]) #Current inje
 weightValues = np.arange(-1, .99, 0.01)
 t_eff = np.zeros(len(weightValues))
 tauIdx = 0
+#Tau Effective Regression
 #region
 #Running the simulation for every weight in the weight values
 for w in weightValues:
@@ -82,6 +83,7 @@ if plotTeff:
     plt.ylabel("Tau Effective")
     plt.show()
 #endregion
+#Plotting Nonlinear Functions
 #region
 #Plotting different nonlinear activation functions for different values of a and p
 def PlotNonlinear(a_param, p_param, r_vect_param):
@@ -90,9 +92,11 @@ def PlotNonlinear(a_param, p_param, r_vect_param):
         myY[i] = Activation(a_param,p_param, r_vect_param[i])
     plt.suptitle("Sigmoid Function a=" + str(a_param) + " p=" + str(p_param))
     plt.plot(r_vect_param, myY)
+    plt.ylabel("F(r)")
+    plt.xlabel("Firing rate")
     plt.show()
-r = np.linspace(0,1, 100)
-a_vals = np.arange(1,50, 2)
+r = np.linspace(0,30, 100)
+a_vals = np.arange(1,50, 10)
 p_vals = np.arange(1,4, 1)
 y_a = np.zeros(len(r))
     
@@ -100,11 +104,13 @@ if plotNonlinear:
     fig, axs = plt.subplots(ncols=2)
     fig.suptitle("Activation Function r^p/(a+r^p)")
 
-    for fixedA in a_vals:
+    for a1 in a_vals:
         for i in range(0,len(r)):
-            y_a[i] = Activation(fixedA, 1, r[i])
-        axs[0].plot(r, y_a, label=str(fixedA))
+            y_a[i] = Activation(a1, 1, r[i])
+        axs[0].plot(r, y_a, label=str(a1))
     axs[0].set_title("Varrying a Values With p=1")
+    axs[0].set_ylabel("F(r)")
+    axs[0].set_xlabel("Firing rate")
     axs[0].legend()
     axs[0].plot()
 
@@ -113,10 +119,14 @@ if plotNonlinear:
             y_a[i] = Activation(20, p1, r[i])
         axs[1].plot(r, y_a, label=str(p1))
     axs[1].set_title("Varrying p Values With a=20")
+    axs[1].set_ylabel("F(r)")
+    axs[1].set_xlabel("Firing rate")
     axs[1].legend()
     axs[1].plot()
+    plt.subplots_adjust(wspace=.3)
     plt.show()
 #endregion
+#Plotting Firing Rate
 #region
 #Running a simulation using a given nonlinear activation function
 #Constants for every run
@@ -142,6 +152,7 @@ if plotFiringRate:
     axs.legend()
     plt.show()
 #endregion
+#Finding Fixed Points
 #region
 #Running a simulation for finding fixed points
 if plotFixedPoints:
@@ -161,4 +172,5 @@ if plotFixedPoints:
     plt.legend()
     plt.show()
 #endregion
-PlotNonlinear(.3, 1, np.linspace(0,1,100))
+#Graphing a specific nonlinearity
+#PlotNonlinear(.3, 1, np.linspace(0,1,100))
